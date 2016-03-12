@@ -2,7 +2,10 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.TreeMap;
 
 public class MainForm extends JDialog {
     private JPanel contentPane;
@@ -17,6 +20,9 @@ public class MainForm extends JDialog {
     private JLabel labelAddress;
     private JComboBox<String> comboBoxCriterion;
     private JTextField textFieldValue;
+
+    private Properties prop;
+    private TreeMap<String, Abonent> phoneBook;
 
     public MainForm() throws IOException {
         setContentPane(contentPane);
@@ -43,24 +49,62 @@ public class MainForm extends JDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
 
-        Properties prop = new Properties();
+        prop = new Properties();
         String propFileName = "Resources.properties";
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
         if (inputStream != null)
             prop.load(inputStream);
 
-        comboBoxCriterion.addItem(prop.getProperty("address"));
-        comboBoxCriterion.addItem(prop.getProperty("firstName"));
-        comboBoxCriterion.addItem(prop.getProperty("lastName"));
-        comboBoxCriterion.addItem(prop.getProperty("fathersName"));
         comboBoxCriterion.addItem(prop.getProperty("phoneNumber"));
+
+//        comboBoxCriterion.addItem(prop.getProperty("firstName"));
+        comboBoxCriterion.addItem(prop.getProperty("lastName"));
+//        comboBoxCriterion.addItem(prop.getProperty("fathersName"));
+        comboBoxCriterion.addItem(prop.getProperty("address"));
+
+        phoneBook = new TreeMap<>();
+        Abonent abonent1 = new Abonent("George", "Washington", "Unknown", "White House");
+        Abonent abonent2 = new Abonent("John", "Adams", "George", "White House");
+        Abonent abonent3 = new Abonent("Thomas", "Jefferson", "John", "White House");
+        Abonent abonent4 = new Abonent("James", "Madison", "Thomas", "White House");
+        Abonent abonent5 = new Abonent("James", "Monroe", "Unknown", "White House");
+        phoneBook.put("+1 111 1111", abonent1);
+        phoneBook.put("+1 222 2222", abonent2);
+        phoneBook.put("+1 333 3333", abonent3);
+        phoneBook.put("+1 444 4444", abonent4);
+        phoneBook.put("+1 555 5555", abonent5);
     }
     //---------------------------------------------------
 
     private void onSearch() {
-// add your code here
-        labelPhoneNumber.setText("ABCDEFGHIJK");
-//        dispose();
+        String selectedValueToSearch = (String) comboBoxCriterion.getSelectedItem();
+
+        String text = textFieldValue.getText();
+
+        for (Map.Entry<String, Abonent> entry : phoneBook.entrySet()) {
+            String key = entry.getKey();
+            Abonent value = entry.getValue();
+
+            boolean found = false;
+            if (Objects.equals(selectedValueToSearch, prop.getProperty("phoneNumber"))) if (Objects.equals(key, text))
+                found = true;
+            if (Objects.equals(selectedValueToSearch, prop.getProperty("lastName")))
+                if (Objects.equals(value.lastName, text))
+                    found = true;
+            if (Objects.equals(selectedValueToSearch, prop.getProperty("address")))
+                if (Objects.equals(value.address, text))
+                    found = true;
+
+            if (found) {
+                labelPhoneNumber.setText(key);
+                labelFirstName.setText(value.firstName);
+                labelLastName.setText(value.lastName);
+                labelFathersName.setText(value.fathersName);
+                labelAddress.setText(value.address);
+                break;
+            }
+
+        }
     }
 
     private void onCancel() {
